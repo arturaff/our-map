@@ -56,14 +56,14 @@ class FriendsFragment : Fragment() {
                     setTitle(getString(R.string.add_friend))
                     setMessage(getString(R.string.add_a_friend_to_see_it_on_the_map))
                     setPositiveButton(getString(R.string.add)) { _, _ ->
-                        if (userId.text.toString() == FirebaseAuth.getInstance().uid.toString()) {
+                        if ("${userId.text}" == "${FirebaseAuth.getInstance().uid}") {
                             Toast.makeText(
                                 requireContext(),
                                 getString(R.string.this_is_your_ID),
                                 Toast.LENGTH_LONG
                             ).show()
-                        } else if (userId.text.toString().length != 28) {
-                            Log.d("Attempt", userId.text.toString() + userId.text.toString().length)
+                        } else if ("${userId.text}".length != 28) {
+                            Log.d("Attempt", "${userId.text}" + "${userId.text}".length)
                             Toast.makeText(
                                 requireContext(),
                                 getString(R.string.the_length_of_the_user_ID_should_be_28_characters),
@@ -83,7 +83,7 @@ class FriendsFragment : Fragment() {
                                     } else {
                                         reference.child("invites").get().apply {
                                             addOnSuccessListener { friends ->
-                                                if (!"${friends.value}".contains(userId.text.toString())) this.result.ref.setValue(
+                                                if (!"${friends.value}".contains("${userId.text}")) this.result.ref.setValue(
                                                     "${result.value}${FirebaseAuth.getInstance().uid};".trim()
                                                         .replace("null", "")
                                                 ) else Toast.makeText(

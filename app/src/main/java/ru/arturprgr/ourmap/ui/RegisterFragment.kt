@@ -28,27 +28,27 @@ class RegisterFragment : Fragment() {
             }
 
             register.setOnClickListener {
-                if (email.text.toString() == "" &&
-                    name.text.toString() == "" &&
-                    password.text.toString() == "" &&
-                    password2.text.toString() == ""
+                if ("${email.text}" == "" &&
+                    "${name.text}" == "" &&
+                    "${password.text}" == "" &&
+                    "${password2.text}" == ""
                 ) {
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.fill_all_fields),
                         Toast.LENGTH_LONG
                     ).show()
-                } else if (password.text.toString().length <= 8) {
+                } else if ("${password.text}".length <= 8) {
                     password.error == getString(R.string.too_short_password_invent_at_least_8_characters)
-                } else if (password.text.toString() != password2.text.toString()) {
+                } else if ("${password.text}" != "${password2.text}") {
                     password2.error == getString(R.string.passwords_do_not_match)
                 } else FirebaseAuth.getInstance().createUserWithEmailAndPassword(
-                    email.text.toString(),
-                    password.text.toString()
+                    "${email.text}",
+                   "${password.text}"
                 ).apply {
                     addOnSuccessListener {
                         FirebaseDatabase.getInstance().getReference("ourmap/${FirebaseAuth.getInstance().uid}").apply {
-                            child("name").setValue(name.text.toString().trim())
+                            child("name").setValue("${name.text}".trim())
                             child("status").setValue("Олд")
                             child("friends").setValue("")
                             child("invites").setValue("")

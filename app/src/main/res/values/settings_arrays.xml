@@ -1,0 +1,14 @@
+<resources>
+    <string-array name="map_sources">
+        <item>MAPNIK</item>
+        <item>WIKIMEDIA</item>
+        <item>PUBLIC_TRANSPORT</item>
+        <item>HIKEBIKEMAP</item>
+        <item>USGS_TOPO</item>
+        <item>USGS_SAT</item>
+        <item>ChartbundleWAC</item>
+        <item>ChartbundleENRH</item>
+        <item>ChartbundleENRL</item>
+        <item>OpenTopo</item>
+    </string-array>
+</resources>

@@ -1,12 +1,11 @@
 package ru.arturprgr.ourmap
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import ru.arturprgr.ourmap.adapter.LoginFragmentsAdapter
+import ru.arturprgr.ourmap.adapter.fragments.LoginFragmentsAdapter
 import ru.arturprgr.ourmap.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
@@ -26,10 +25,5 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.root.adapter = LoginFragmentsAdapter(this@LoginActivity)
-    }
-
-    fun openMainActivity() {
-        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-        finish()
     }
 }

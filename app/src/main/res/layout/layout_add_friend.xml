@@ -6,7 +6,8 @@
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/user_id"
         android:layout_width="match_parent"
-        android:layout_marginHorizontal="50dp"
+        android:layout_marginHorizontal="20dp"
+        android:textSize="14sp"
         android:layout_height="wrap_content"
         android:hint="@string/enter_or_paste_id_your_friend" />
 </com.google.android.material.textfield.TextInputLayout>

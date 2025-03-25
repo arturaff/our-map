@@ -15,10 +15,9 @@ import ru.arturprgr.ourmap.R
 import ru.arturprgr.ourmap.databinding.LayoutFriendBinding
 import ru.arturprgr.ourmap.model.User
 import ru.arturprgr.ourmap.ui.MapFragment
-import kotlin.coroutines.coroutineContext
 
 class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
-    private val friendsList: ArrayList<User> = arrayListOf()
+    val friendsList: ArrayList<User> = arrayListOf()
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         @SuppressLint("SetTextI18n")
@@ -43,8 +42,9 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
                     AlertDialog.Builder(friend.context).apply {
                         setIcon(R.drawable.ic_delete)
                         setTitle(R.string.removing_from_friends)
-                        setMessage(R.string.the_sweattles_of_action)
+                        setMessage(R.string.сonfirm_the_action)
                         setPositiveButton(R.string.yes) { _, _ ->
+                            MapFragment.removeMarker(friend.realIndex + 1)
                             userReference.child("friends").get().addOnSuccessListener {
                                 it.ref.setValue(
                                     "${it.value}".replace("${friend.uid};", "").replace("null", "")

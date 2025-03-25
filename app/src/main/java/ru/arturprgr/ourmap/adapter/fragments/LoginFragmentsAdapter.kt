@@ -1,4 +1,4 @@
-package ru.arturprgr.ourmap.adapter
+package ru.arturprgr.ourmap.adapter.fragments
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity

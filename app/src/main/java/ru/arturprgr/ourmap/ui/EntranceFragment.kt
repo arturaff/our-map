@@ -28,9 +28,9 @@ class EntranceFragment : Fragment() {
             }
 
             signIn.setOnClickListener {
-                if (email.text.toString() != "" && password.text.toString() != "") FirebaseAuth.getInstance().signInWithEmailAndPassword(
-                    email.text.toString(),
-                    password.text.toString()
+                if ("${email.text}" != "" && "${password.text}" != "") FirebaseAuth.getInstance().signInWithEmailAndPassword(
+                    "${email.text}",
+                    "${password.text}"
                 ).apply {
                     addOnSuccessListener {
                         activity?.finish()
