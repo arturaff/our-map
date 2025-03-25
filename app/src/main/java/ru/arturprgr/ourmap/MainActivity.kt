@@ -105,31 +105,32 @@ class MainActivity : AppCompatActivity() {
                                                                 .addOnSuccessListener { latitude ->
                                                                     child("longitude").get()
                                                                         .addOnSuccessListener { longitude ->
+                                                                            val friend = User(
+                                                                                this@MainActivity,
+                                                                                index2 + size,
+                                                                                index2,
+                                                                                true,
+                                                                                "${name.value}",
+                                                                                "${status.value}",
+                                                                                uid,
+                                                                                null
+                                                                            )
                                                                             if (latitude.value != null && longitude.value != null) {
                                                                                 val geoPoint =
                                                                                     GeoPoint(
                                                                                         "${latitude.value}".toDouble(),
                                                                                         "${longitude.value}".toDouble()
                                                                                     )
-                                                                                val friend = User(
-                                                                                    this@MainActivity,
-                                                                                    index2 + size,
-                                                                                    index2,
-                                                                                    true,
-                                                                                    "${name.value}",
-                                                                                    "${status.value}",
-                                                                                    uid,
-                                                                                    geoPoint
-                                                                                )
+                                                                                friend.geoPoint= geoPoint
                                                                                 MapFragment.addMarker(
                                                                                     this@MainActivity,
                                                                                     "${name.value}",
                                                                                     geoPoint
                                                                                 )
-                                                                                friendsAdapter.addFriend(
-                                                                                    friend
-                                                                                )
                                                                             }
+                                                                            friendsAdapter.addFriend(
+                                                                                friend
+                                                                            )
                                                                         }
                                                                 }
                                                         }

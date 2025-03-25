@@ -78,12 +78,16 @@ class UpdateLocationService : Service() {
     override fun onCreate() {
         super.onCreate()
         isWorked = true
+        FirebaseDatabase.getInstance()
+            .getReference("ourmap/${FirebaseAuth.getInstance().uid}/serviceWork").setValue(true)
         Log.w("Attempt", "Service: onCreate()")
     }
 
     override fun onDestroy() {
         super.onDestroy()
         isWorked = false
+        FirebaseDatabase.getInstance()
+            .getReference("ourmap/${FirebaseAuth.getInstance().uid}/serviceWork").setValue(false)
         manager.cancel(41)
         Log.w("Attempt", "Service: onDestroy()")
     }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -31,7 +32,7 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
                 delete.isVisible = true
                 confirm.isVisible = false
                 cancel.isVisible = false
-                root.setOnLongClickListener {
+                if (friend.geoPoint != null) root.setOnLongClickListener {
                     MainActivity.viewMap()
                     MapFragment.setCenter(friend.geoPoint!!)
                     true
