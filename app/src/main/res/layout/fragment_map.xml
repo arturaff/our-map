@@ -6,16 +6,16 @@
     tools:context=".ui.MapFragment">
 
     <org.osmdroid.views.MapView
-        android:layout_width="match_parent"
         android:id="@+id/map"
+        android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:textColor="#3C3C3C"
         android:text="@string/map"
+        android:textColor="#3C3C3C"
         android:textSize="22sp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

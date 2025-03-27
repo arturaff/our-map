@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import org.osmdroid.util.GeoPoint
 import ru.arturprgr.ourmap.MainActivity
 import ru.arturprgr.ourmap.R
 import ru.arturprgr.ourmap.databinding.LayoutFriendBinding
@@ -22,42 +23,66 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         @SuppressLint("SetTextI18n")
-        fun bind(friend: User) = with(LayoutFriendBinding.bind(itemView)) {
-            val userReference = FirebaseDatabase.getInstance()
+        fun bind(user: User) = with(LayoutFriendBinding.bind(itemView)) {
+            val myRef = FirebaseDatabase.getInstance()
                 .getReference("ourmap/${FirebaseAuth.getInstance().uid}")
-            val friendReference =
-                FirebaseDatabase.getInstance().getReference("ourmap/${friend.uid}")
-            userId.text = "ID: ${friend.uid}"
-            if (friend.isFriend) {
+            val userRef = FirebaseDatabase.getInstance().getReference("ourmap/${user.uid}")
+            userId.text = "ID: ${user.uid}"
+            userRef.apply {
+                child("name").get().addOnSuccessListener { name ->
+                    child("status").get().addOnSuccessListener { status ->
+                        main.setOnClickListener {
+                            val view = View.inflate(main.context, R.layout.layout_user, null)
+                            AlertDialog.Builder(main.context).apply {
+                                view.findViewById<TextView>(R.id.name).text = "${name.value}"
+                                view.findViewById<TextView>(R.id.status).text = "${status.value}"
+                                setView(view)
+                                create().show()
+                            }
+                        }
+                    }
+                }
+            }
+            if (user.isFriend) {
                 delete.isVisible = true
                 confirm.isVisible = false
                 cancel.isVisible = false
-                if (friend.geoPoint != null) root.setOnLongClickListener {
-                    MainActivity.viewMap()
-                    MapFragment.setCenter(friend.geoPoint!!)
+                name.text = user.name
+                root.setOnLongClickListener {
+                    if (user.geoPoint != null) {
+                        MainActivity.viewMap()
+                        MapFragment.setCenter(user.geoPoint!!)
+                    } else Toast.makeText(
+                        root.context,
+                        root.context.getString(R.string.the_coordinates_are_still_unknown),
+                        Toast.LENGTH_LONG
+                    ).show()
                     true
                 }
-                name.text = friend.name
                 delete.setOnClickListener {
 //                    Удаление
-                    AlertDialog.Builder(friend.context).apply {
+                    AlertDialog.Builder(root.context).apply {
                         setIcon(R.drawable.ic_delete)
                         setTitle(R.string.removing_from_friends)
                         setMessage(R.string.сonfirm_the_action)
                         setPositiveButton(R.string.yes) { _, _ ->
-                            MapFragment.removeMarker(friend.realIndex + 1)
-                            userReference.child("friends").get().addOnSuccessListener {
-                                it.ref.setValue(
-                                    "${it.value}".replace("${friend.uid};", "").replace("null", "")
-                                )
-                                MainActivity.friendsAdapter.removeFriend(friend)
-                            }
-                            friendReference.child("friends").get().addOnSuccessListener {
+                            userRef.child("friends").get().addOnSuccessListener {
                                 it.ref.setValue(
                                     "${it.value}".replace(
                                         "${FirebaseAuth.getInstance().uid};", ""
                                     ).replace("null", "")
                                 )
+                                myRef.child("friends").get().addOnSuccessListener {
+                                    it.ref.setValue(
+                                        "${it.value}".replace("${user.uid};", "")
+                                            .replace("null", "")
+                                    )
+                                    MainActivity.friendsAdapter.removeUser(user)
+                                    try {
+                                        MapFragment.removeMarker(user.realIndex + 1)
+                                    } catch (_: ArrayIndexOutOfBoundsException) {
+                                    }
+                                }
                             }
                         }
                         setNegativeButton(R.string.no) { _, _ -> }
@@ -69,46 +94,53 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
                 confirm.isVisible = true
                 cancel.isVisible = true
                 name.text =
-                    "${friend.name} ${root.resources.getString(R.string.wants_to_add_you_to_friends)}"
+                    "${user.name} ${root.resources.getString(R.string.wants_to_add_you_to_friends)}"
                 confirm.setOnClickListener {
                     //                     Добавление
-                    userReference.apply {
+                    myRef.apply {
                         child("invites").get().addOnSuccessListener {
                             it.ref.setValue(
-                                "${it.value}".replace("${friend.uid};", "").replace("null", "")
+                                "${it.value}".replace("${user.uid};", "").replace("null", "")
                             )
                         }
                         child("friends").get().addOnSuccessListener {
-                            it.ref.setValue("${it.value}${friend.uid};".replace("null", ""))
-                            MainActivity.friendsAdapter.removeFriend(friend)
+                            it.ref.setValue(
+                                "${it.value}${user.uid};".replace("null", "")
+                            )
+                        }
+                        userRef.apply {
+                            child("friends").get().addOnSuccessListener {
+                                it.ref.setValue(
+                                    "${it.value}${FirebaseAuth.getInstance().uid};".replace(
+                                        "null", ""
+                                    )
+                                )
+                            }
+                            child("latitude").get().addOnSuccessListener { latitude ->
+                                child("longitude").get().addOnSuccessListener { longitude ->
+                                    if (latitude.value != null && longitude.value != null) {
+                                        user.geoPoint = GeoPoint(
+                                            "${latitude.value}".toDouble(),
+                                            "${longitude.value}".toDouble()
+                                        )
+                                        MapFragment.addMarker(
+                                            user.name, user.geoPoint!!
+                                        )
+                                    }
+                                    user.isFriend = true
+                                    MainActivity.friendsAdapter.changeUser(user.index, user)
+                                }
+                            }
                         }
                     }
-                    friendReference.child("friends").get().addOnSuccessListener {
-                        it.ref.setValue(
-                            "${it.value}${FirebaseAuth.getInstance().uid};".replace("null", "")
-                        )
-                    }
-                    MainActivity.friendsAdapter.removeFriend(friend)
-                    friend.isFriend = true
-                    MainActivity.friendsAdapter.addFriend(friend)
                 }
                 cancel.setOnClickListener {
-                    userReference.child("invites").get().addOnSuccessListener {
+                    myRef.child("invites").get().addOnSuccessListener {
                         it.ref.setValue(
-                            "${it.value}".replace("${friend.uid};", "").replace("null", "")
+                            "${it.value}".replace("${user.uid};", "").replace("null", "")
                         )
-                        MainActivity.friendsAdapter.removeFriend(friend)
+                        MainActivity.friendsAdapter.removeUser(user)
                     }
-                }
-            }
-            root.setOnClickListener {
-                val view = View.inflate(friend.context, R.layout.layout_account, null)
-                androidx.appcompat.app.AlertDialog.Builder(friend.context).apply {
-                    view.findViewById<TextView>(R.id.name).text = friend.name
-                    view.findViewById<TextView>(R.id.status).text = friend.status
-                    setView(view)
-                    create()
-                    show()
                 }
             }
         }
@@ -125,13 +157,18 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) =
         holder.bind(friendsList[position])
 
-    private fun removeFriend(friend: User) {
-        friendsList.remove(friend)
-        notifyItemRemoved(friend.index)
+    private fun removeUser(user: User) {
+        friendsList.remove(user)
+        notifyItemRemoved(user.index)
     }
 
-    fun addFriend(friend: User) {
-        friendsList.add(friend)
-        notifyItemInserted(friendsList.size - 1)
+    private fun changeUser(index: Int, user: User) {
+        friendsList[index] = user
+        notifyItemChanged(index)
+    }
+
+    fun addUser(user: User) {
+        friendsList.add(user)
+        notifyItemInserted(user.index)
     }
 }

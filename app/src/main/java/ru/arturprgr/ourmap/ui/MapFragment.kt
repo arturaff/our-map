@@ -1,8 +1,6 @@
 package ru.arturprgr.ourmap.ui
 
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -37,9 +35,9 @@ class MapFragment : Fragment() {
             }
         }
 
-        fun addMarker(context: Context, text: String, geoPoint: GeoPoint) = binding.apply {
+        fun addMarker(text: String, geoPoint: GeoPoint) = binding.apply {
             map.overlays.add(Marker(map).apply {
-                icon = ContextCompat.getDrawable(context, R.drawable.ic_marker_friend)
+                icon = ContextCompat.getDrawable(root.context, R.drawable.ic_marker_friend)
                 title = text
                 position = geoPoint
             })
@@ -51,16 +49,15 @@ class MapFragment : Fragment() {
 
         fun setCenter(geoPoint: GeoPoint) = binding.map.apply {
             controller.setZoom(
-                PreferenceManager.getDefaultSharedPreferences(context).getInt("zoom", 17)
-                    .toDouble()
+                PreferenceManager.getDefaultSharedPreferences(context).getInt("zoom", 17).toDouble()
             )
             controller.setCenter(geoPoint)
         }
 
-        fun setUserGeo(context: Context, geoPoint: GeoPoint) = binding.apply {
+        fun setUserGeo(geoPoint: GeoPoint) = binding.apply {
             map.overlays.add(Marker(map).apply {
-                icon = ContextCompat.getDrawable(context, R.drawable.ic_marker_me)
-                title = context.getString(R.string.my_geo_location)
+                icon = ContextCompat.getDrawable(root.context, R.drawable.ic_marker_me)
+                title = root.context.getString(R.string.my_geo_location)
                 position = geoPoint
                 setCenter(geoPoint)
                 me.setOnClickListener {
@@ -68,8 +65,6 @@ class MapFragment : Fragment() {
                 }
             })
         }
-
-        fun clearMap() = binding.map.overlays.clear()
     }
 
     override fun onCreateView(
@@ -84,6 +79,9 @@ class MapFragment : Fragment() {
                         .getString("map_source", "OpenTopo")
                 }"
             )
+            map.setMultiTouchControls(true)
+            map.minZoomLevel = 4.0
+            map.maxZoomLevel = 20.0
         }
 
         return binding.root
@@ -93,14 +91,16 @@ class MapFragment : Fragment() {
         super.onResume()
         binding.map.onResume()
         val list = MainActivity.friendsAdapter.friendsList
-        if (list != arrayListOf<User>()) for (friend in list) {
+        if (list != arrayListOf<User>()) list.forEach { friend ->
             FirebaseDatabase.getInstance().getReference("ourmap/${friend.uid}").apply {
                 child("latitude").get().addOnSuccessListener { latitude ->
                     child("longitude").get().addOnSuccessListener { longitude ->
-                        friend.geoPoint = GeoPoint(
-                            "${latitude.value}".toDouble(), "${longitude.value}".toDouble()
-                        )
-                        addMarker(requireContext(), friend.name, friend.geoPoint!!)
+                        if (latitude.value != null && longitude.value != null) {
+                            friend.geoPoint = GeoPoint(
+                                "${latitude.value}".toDouble(), "${longitude.value}".toDouble()
+                            )
+                            addMarker(friend.name, friend.geoPoint!!)
+                        } else friend.geoPoint = null
                     }
                 }
             }
@@ -110,6 +110,6 @@ class MapFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         binding.map.onPause()
-        clearMap()
+        binding.map.overlays.clear()
     }
 }

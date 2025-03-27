@@ -58,8 +58,8 @@ class UpdateLocationService : Service() {
                 val reference = FirebaseDatabase.getInstance()
                     .getReference("ourmap/${FirebaseAuth.getInstance().uid}")
                 while (true) {
-                    LocationServices.getFusedLocationProviderClient(baseContext).lastLocation.addOnSuccessListener { location: Location? ->
-                        location?.let {
+                    LocationServices.getFusedLocationProviderClient(baseContext).lastLocation.addOnSuccessListener {
+                        it?.let {
                             reference.child("latitude").setValue(it.latitude)
                             reference.child("longitude").setValue(it.longitude)
                             Log.d("Attempt", "${it.latitude}, ${it.longitude}")

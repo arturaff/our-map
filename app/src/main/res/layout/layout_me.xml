@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <include
-        layout="@layout/layout_account"
+        layout="@layout/layout_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal" />

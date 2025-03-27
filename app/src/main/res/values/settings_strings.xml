@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_activity_settings" translatable="false">SettingsActivity</string>
-    <string name="zoom">Zoom</string>
+    <string name="zoom_by_default">Zoom by default</string>
     <string name="broadcast">Broadcast</string>
     <string name="share_location">Share location</string>
-    <string name="delay">Delay</string>
+    <string name="record_delay">Record delay (in minutes)</string>
     <string name="map_source">Map Source</string>
 </resources>

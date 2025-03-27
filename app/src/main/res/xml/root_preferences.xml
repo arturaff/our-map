@@ -12,7 +12,7 @@
             app:key="delay"
             app:min="1"
             app:showSeekBarValue="true"
-            app:title="@string/delay" />
+            app:title="@string/record_delay" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/map">
@@ -22,7 +22,7 @@
             app:defaultValue="17"
             app:key="zoom"
             app:min="4"
-            app:title="@string/zoom" />
+            app:title="@string/zoom_by_default" />
 
         <ListPreference
             app:defaultValue="OpenTopo"

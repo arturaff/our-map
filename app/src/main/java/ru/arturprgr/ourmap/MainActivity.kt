@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -19,10 +18,7 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.preference.PreferenceManager
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import org.osmdroid.util.GeoPoint
 import ru.arturprgr.ourmap.adapter.FriendsAdapter
 import ru.arturprgr.ourmap.databinding.ActivityMainBinding
@@ -50,7 +46,6 @@ class MainActivity : AppCompatActivity() {
     private var name: String = ""
     private var status: String = ""
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (FirebaseAuth.getInstance().currentUser == null) {
@@ -73,17 +68,17 @@ class MainActivity : AppCompatActivity() {
                                 FirebaseDatabase.getInstance().getReference("ourmap/$uid").apply {
                                     child("name").get().addOnSuccessListener { name ->
                                         child("status").get().addOnSuccessListener { status ->
-                                            val invite = User(
-                                                this@MainActivity,
-                                                index,
-                                                index,
-                                                false,
-                                                "${name.value}",
-                                                "${status.value}",
-                                                uid,
-                                                null
+                                            friendsAdapter.addUser(
+                                                User(
+                                                    index,
+                                                    index,
+                                                    false,
+                                                    "${name.value}",
+                                                    "${status.value}",
+                                                    uid,
+                                                    null
+                                                )
                                             )
-                                            friendsAdapter.addFriend(invite)
                                         }
                                     }
                                 }
@@ -101,36 +96,31 @@ class MainActivity : AppCompatActivity() {
                                                 child("name").get().addOnSuccessListener { name ->
                                                     child("status").get()
                                                         .addOnSuccessListener { status ->
+                                                            val friend = User(
+                                                                index2 + size,
+                                                                index2,
+                                                                true,
+                                                                "${name.value}",
+                                                                "${status.value}",
+                                                                uid,
+                                                                null
+                                                            )
+                                                            friendsAdapter.addUser(friend)
                                                             child("latitude").get()
                                                                 .addOnSuccessListener { latitude ->
                                                                     child("longitude").get()
                                                                         .addOnSuccessListener { longitude ->
-                                                                            val friend = User(
-                                                                                this@MainActivity,
-                                                                                index2 + size,
-                                                                                index2,
-                                                                                true,
-                                                                                "${name.value}",
-                                                                                "${status.value}",
-                                                                                uid,
-                                                                                null
-                                                                            )
                                                                             if (latitude.value != null && longitude.value != null) {
-                                                                                val geoPoint =
+                                                                                friend.geoPoint =
                                                                                     GeoPoint(
                                                                                         "${latitude.value}".toDouble(),
                                                                                         "${longitude.value}".toDouble()
                                                                                     )
-                                                                                friend.geoPoint= geoPoint
                                                                                 MapFragment.addMarker(
-                                                                                    this@MainActivity,
-                                                                                    "${name.value}",
-                                                                                    geoPoint
+                                                                                    friend.name,
+                                                                                    friend.geoPoint!!
                                                                                 )
                                                                             }
-                                                                            friendsAdapter.addFriend(
-                                                                                friend
-                                                                            )
                                                                         }
                                                                 }
                                                         }
@@ -140,71 +130,61 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }
-                        child("name").addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                name = "${snapshot.value} (${resources.getString(R.string.you)})"
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-                            }
-                        })
-                        child("status").addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                status = "${snapshot.value}"
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-                            }
-                        })
                     }
-
-                    enableEdgeToEdge()
-                    setContentView(binding.root)
-                    ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-                        val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                        v.setPadding(
-                            systemBars.left, systemBars.top, systemBars.right, systemBars.bottom
-                        )
-                        insets
+                    child("name").get().addOnSuccessListener {
+                        name = "${it.value} (${resources.getString(R.string.you)})"
                     }
+                    child("status").get().addOnSuccessListener {
+                        status = "${it.value}"
+                    }
+                }
 
-                    binding.apply {
-                        navigation.setOnItemSelectedListener {
-                            when (it.itemId) {
-                                R.id.item_map -> selectFragment(fragmentMap)
-                                R.id.item_friends -> selectFragment(fragmentFriends)
-                            }
-                            true
+            enableEdgeToEdge()
+            setContentView(binding.root)
+            ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(
+                    systemBars.left, systemBars.top, systemBars.right, systemBars.bottom
+                )
+                insets
+            }
+
+            binding.apply {
+                navigation.setOnItemSelectedListener {
+                    when (it.itemId) {
+                        R.id.item_map -> selectFragment(fragmentMap)
+                        R.id.item_friends -> selectFragment(fragmentFriends)
+                    }
+                    true
+                }
+                account.setOnClickListener {
+                    val view = View.inflate(this@MainActivity, R.layout.layout_me, null)
+                    AlertDialog.Builder(this@MainActivity).apply {
+                        view.findViewById<TextView>(R.id.name).text = name
+                        view.findViewById<TextView>(R.id.status).text = status
+                        view.findViewById<TextView>(R.id.settings).setOnClickListener {
+                            startActivity(
+                                Intent(
+                                    this@MainActivity, SettingsActivity::class.java
+                                )
+                            )
                         }
-                        account.setOnClickListener {
-                            val view = View.inflate(this@MainActivity, R.layout.layout_me, null)
+                        view.findViewById<TextView>(R.id.leave).setOnClickListener {
                             AlertDialog.Builder(this@MainActivity).apply {
-                                view.findViewById<TextView>(R.id.name).text = name
-                                view.findViewById<TextView>(R.id.status).text = status
-                                view.findViewById<TextView>(R.id.settings).setOnClickListener {
-                                    startActivity(
-                                        Intent(
-                                            this@MainActivity, SettingsActivity::class.java
-                                        )
-                                    )
+                                setTitle(R.string.leave_the_account)
+                                setMessage(R.string.сonfirm_the_action)
+                                setPositiveButton(R.string.leave) { _, _ ->
+                                    FirebaseAuth.getInstance().signOut()
                                 }
-                                view.findViewById<TextView>(R.id.leave).setOnClickListener {
-                                    AlertDialog.Builder(this@MainActivity).apply {
-                                        setTitle(R.string.leave_the_account)
-                                        setMessage(R.string.сonfirm_the_action)
-                                        setPositiveButton(R.string.leave) { _, _ ->
-                                            FirebaseAuth.getInstance().signOut()
-                                        }
-                                        setNegativeButton(R.string.cancel) { _, _ -> }
-                                        show()
-                                    }
-                                }
-                                setView(view)
+                                setNegativeButton(R.string.cancel) { _, _ -> }
                                 show()
                             }
                         }
+                        setView(view)
+                        show()
                     }
                 }
+            }
         }
     }
 
@@ -235,11 +215,9 @@ class MainActivity : AppCompatActivity() {
             )
             finish()
         } else {
-            LocationServices.getFusedLocationProviderClient(this@MainActivity).lastLocation.addOnSuccessListener { location: Location? ->
-                location?.let {
-                    MapFragment.setUserGeo(
-                        this@MainActivity, GeoPoint(it.latitude, it.longitude)
-                    )
+            LocationServices.getFusedLocationProviderClient(this@MainActivity).lastLocation.addOnSuccessListener {
+                it?.let {
+                    MapFragment.setUserGeo(GeoPoint(it.latitude, it.longitude))
                 }
             }
             if (PreferenceManager.getDefaultSharedPreferences(this@MainActivity)

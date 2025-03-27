@@ -32,7 +32,6 @@ class FriendsFragment : Fragment() {
         binding.apply {
             friends.layoutManager = LinearLayoutManager(requireContext())
             friends.adapter = MainActivity.friendsAdapter
-
             userId.text = "${getString(R.string.your_id)} ${FirebaseAuth.getInstance().uid}"
             userId.setOnClickListener {
                 val clipboard: ClipboardManager =

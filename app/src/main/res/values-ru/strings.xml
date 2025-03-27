@@ -39,11 +39,12 @@
     <string name="an_error_occurred">Произошла ошибка</string>
     <string name="add_a_friend_to_see_it_on_the_map">Добавьте друга, чтобы увидеть его на карте</string>
     <string name="settings">Настройки</string>
-    <string name="zoom">Зум</string>
+    <string name="zoom_by_default">Зум по умолчанию</string>
     <string name="leave_the_account">Выйти из аккаунта</string>
     <string name="leave">Выйти</string>
     <string name="broadcast">Передача</string>
     <string name="share_location">Делиться местоположением</string>
-    <string name="delay">Задержка</string>
+    <string name="record_delay">Задержка записи (в минутах)</string>
     <string name="map_source">Источник карты</string>
+    <string name="the_coordinates_are_still_unknown">Координаты пока неизвестны</string>
 </resources>
