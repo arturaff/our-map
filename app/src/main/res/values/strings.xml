@@ -41,4 +41,5 @@
     <string name="leave_the_account">Leave the account</string>
     <string name="leave">Leave</string>
     <string name="the_coordinates_are_still_unknown">The coordinates are still unknown</string>
+    <string name="you_have_this_user_as_a_friend">You have this user as a friend</string>
 </resources>

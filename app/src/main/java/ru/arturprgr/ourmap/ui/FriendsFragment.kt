@@ -5,7 +5,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,17 +61,23 @@ class FriendsFragment : Fragment() {
                                 Toast.LENGTH_LONG
                             ).show()
                         } else if ("${userId.text}".length != 28) {
-                            Log.d("Attempt", "${userId.text}" + "${userId.text}".length)
                             Toast.makeText(
                                 requireContext(),
                                 getString(R.string.the_length_of_the_user_ID_should_be_28_characters),
                                 Toast.LENGTH_LONG
                             ).show()
                         } else {
-                            val reference =
-                                FirebaseDatabase.getInstance().getReference("ourmap/${userId.text}")
-                            reference.get().apply {
-                                addOnSuccessListener { users ->
+                            MainActivity.friendsAdapter.list.forEach {
+                                if ("${userId.text}" == it.uid) {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.you_have_this_user_as_a_friend),
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                            FirebaseDatabase.getInstance().getReference("ourmap/${userId.text}").apply {
+                                get().addOnSuccessListener { users ->
                                     if (users.value == null) {
                                         Toast.makeText(
                                             requireContext(),
@@ -80,7 +85,7 @@ class FriendsFragment : Fragment() {
                                             Toast.LENGTH_LONG
                                         ).show()
                                     } else {
-                                        reference.child("invites").get().apply {
+                                        child("invites").get().apply {
                                             addOnSuccessListener { friends ->
                                                 if (!"${friends.value}".contains("${userId.text}")) this.result.ref.setValue(
                                                     "${result.value}${FirebaseAuth.getInstance().uid};".trim()
@@ -102,7 +107,7 @@ class FriendsFragment : Fragment() {
                                         }
                                     }
                                 }
-                                addOnFailureListener {
+                                get().addOnFailureListener {
                                     Toast.makeText(
                                         requireContext(),
                                         getString(R.string.an_error_occurred),

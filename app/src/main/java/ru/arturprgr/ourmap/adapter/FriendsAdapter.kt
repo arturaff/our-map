@@ -19,7 +19,7 @@ import ru.arturprgr.ourmap.model.User
 import ru.arturprgr.ourmap.ui.MapFragment
 
 class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
-    val friendsList: ArrayList<User> = arrayListOf()
+    val list: ArrayList<User> = arrayListOf()
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         @SuppressLint("SetTextI18n")
@@ -37,7 +37,7 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
                                 view.findViewById<TextView>(R.id.name).text = "${name.value}"
                                 view.findViewById<TextView>(R.id.status).text = "${status.value}"
                                 setView(view)
-                                create().show()
+                                show()
                             }
                         }
                     }
@@ -86,7 +86,7 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
                             }
                         }
                         setNegativeButton(R.string.no) { _, _ -> }
-                        create().show()
+                        show()
                     }
                 }
             } else {
@@ -152,23 +152,22 @@ class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
         )
     )
 
-    override fun getItemCount(): Int = friendsList.size
+    override fun getItemCount(): Int = list.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) =
-        holder.bind(friendsList[position])
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(list[position])
 
     private fun removeUser(user: User) {
-        friendsList.remove(user)
+        list.remove(user)
         notifyItemRemoved(user.index)
     }
 
     private fun changeUser(index: Int, user: User) {
-        friendsList[index] = user
+        list[index] = user
         notifyItemChanged(index)
     }
 
     fun addUser(user: User) {
-        friendsList.add(user)
+        list.add(user)
         notifyItemInserted(user.index)
     }
 }

@@ -59,7 +59,6 @@ class MapFragment : Fragment() {
                 icon = ContextCompat.getDrawable(root.context, R.drawable.ic_marker_me)
                 title = root.context.getString(R.string.my_geo_location)
                 position = geoPoint
-                setCenter(geoPoint)
                 me.setOnClickListener {
                     setCenter(geoPoint)
                 }
@@ -90,7 +89,7 @@ class MapFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         binding.map.onResume()
-        val list = MainActivity.friendsAdapter.friendsList
+        val list = MainActivity.friendsAdapter.list
         if (list != arrayListOf<User>()) list.forEach { friend ->
             FirebaseDatabase.getInstance().getReference("ourmap/${friend.uid}").apply {
                 child("latitude").get().addOnSuccessListener { latitude ->

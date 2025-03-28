@@ -7,10 +7,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.IBinder
 import androidx.preference.PreferenceManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
@@ -60,9 +58,9 @@ class UpdateLocationService : Service() {
                 while (true) {
                     LocationServices.getFusedLocationProviderClient(baseContext).lastLocation.addOnSuccessListener {
                         it?.let {
-                            reference.child("latitude").setValue(it.latitude)
-                            reference.child("longitude").setValue(it.longitude)
-                            Log.d("Attempt", "${it.latitude}, ${it.longitude}")
+                            reference.child("latitude").setValue("${it.latitude}")
+                            reference.child("longitude").setValue("${it.longitude}")
+//                            Log.d("Attempt", "${it.latitude}, ${it.longitude}")
                         }
                     }
                     Thread.sleep(
@@ -80,7 +78,7 @@ class UpdateLocationService : Service() {
         isWorked = true
         FirebaseDatabase.getInstance()
             .getReference("ourmap/${FirebaseAuth.getInstance().uid}/serviceWork").setValue(true)
-        Log.w("Attempt", "Service: onCreate()")
+//        Log.w("Attempt", "Service: onCreate()")
     }
 
     override fun onDestroy() {
@@ -89,7 +87,7 @@ class UpdateLocationService : Service() {
         FirebaseDatabase.getInstance()
             .getReference("ourmap/${FirebaseAuth.getInstance().uid}/serviceWork").setValue(false)
         manager.cancel(41)
-        Log.w("Attempt", "Service: onDestroy()")
+//        Log.w("Attempt", "Service: onDestroy()")
     }
 
     override fun onBind(intent: Intent?): IBinder? {

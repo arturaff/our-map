@@ -175,6 +175,12 @@ class MainActivity : AppCompatActivity() {
                                 setMessage(R.string.сonfirm_the_action)
                                 setPositiveButton(R.string.leave) { _, _ ->
                                     FirebaseAuth.getInstance().signOut()
+                                    finish()
+                                    startActivity(
+                                        Intent(
+                                            this@MainActivity, LoginActivity::class.java
+                                        )
+                                    )
                                 }
                                 setNegativeButton(R.string.cancel) { _, _ -> }
                                 show()
@@ -215,14 +221,16 @@ class MainActivity : AppCompatActivity() {
             )
             finish()
         } else {
-            LocationServices.getFusedLocationProviderClient(this@MainActivity).lastLocation.addOnSuccessListener {
+            LocationServices.getFusedLocationProviderClient(baseContext).lastLocation.addOnSuccessListener {
                 it?.let {
-                    MapFragment.setUserGeo(GeoPoint(it.latitude, it.longitude))
+                    val geoPoint = GeoPoint(it.latitude, it.longitude)
+                    MapFragment.setUserGeo(geoPoint)
+                    MapFragment.setCenter(geoPoint)
                 }
             }
             if (PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
-                    .getBoolean("share_location", true)
-            ) if (!UpdateLocationService.isWorked) startForegroundService(
+                    .getBoolean("share_location", true) && !UpdateLocationService.isWorked
+            ) startForegroundService(
                 Intent(this@MainActivity, UpdateLocationService::class.java)
             )
         }
